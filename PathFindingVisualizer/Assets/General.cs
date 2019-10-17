@@ -55,9 +55,13 @@ public class General : MonoBehaviour
         m_Pathfinder = new PathFinder();
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
         buildGraph();
+        debugDrawBoard();
         positionMainCamera();
     }
-    
+
+
+
+
     void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -149,7 +153,7 @@ public class General : MonoBehaviour
                 //foreach (Vector3 neighbor in getSuroundingCells(x, 0, z))
                 foreach (Vector3 neighbor in m_NeighborsPositionCalculator.GetSuroundingCells(x, 0, z))
                 {
-                    MyEdge edge = new MyEdge(m_Graph.GetNodeById((int)(z * k_Rows + x)), m_Graph.GetNodeById((int)(neighbor.z * k_Rows + neighbor.x)), 1);
+                    MyEdge edge = new MyEdge(m_Graph.GetNodeById((int)(z * k_Columns + x)), m_Graph.GetNodeById((int)(neighbor.z * k_Columns + neighbor.x)), 1);
                     m_Graph.AddEdge(edge);
                 }
             }
@@ -166,7 +170,7 @@ public class General : MonoBehaviour
                 Vector3 newCellPosition = new Vector3(x, 0, z);
                 GameObject cellPrefab = Instantiate(m_CellPrefab, newCellPosition, Quaternion.identity, gameObject.transform);
                 cellPrefab.GetComponent<CellPrefabScript>().Position = newCellPosition;
-                currNode = new MyUnityNode(x + z * k_Rows, 11, newCellPosition, cellPrefab);
+                currNode = new MyUnityNode(x + z * k_Columns, 11, newCellPosition, cellPrefab);
                 m_Graph.AddNode(currNode);
             }
         }
@@ -304,199 +308,40 @@ public class General : MonoBehaviour
         return (int)(cellScript.Position.x + cellScript.Position.z * k_Columns);
     }
 
-    //private IList<Vector3> getSuroundingCells(int i_Column, int i_Depth, int i_Row)
-    //{
-    //    List<Vector3> suroundingCells = new List<Vector3>();
+    // DEBUG CODE ====================================================================================================================================
+    private void debugDrawBoard()
+    {
+        int i = 0;
+        bool i_IsBlue = true;
+        foreach (MyUnityNode node in m_Graph.GetAllNodes())
+        {
+            StartCoroutine(doafterWait(node, i * m_DrawSpeed, i_IsBlue));
+            StartCoroutine(doafterWait2(node, (i + 1) * m_DrawSpeed, i_IsBlue));
+            i = i + 2;
+            i_IsBlue = !i_IsBlue;
+        }
+    }
+    IEnumerator doafterWait(MyUnityNode node, float i_Time, bool i_IsBlue)
+    {
+        yield return new WaitForSeconds(i_Time);
+        node.CellPrefab.GetComponent<Renderer>().material.color = Color.yellow;
+        foreach (IEdge neighbor in m_Graph.GetNeighbors(node))
+        {
+            ((MyUnityNode)neighbor.V).CellPrefab.GetComponent<Renderer>().material.color = i_IsBlue ? Color.blue : Color.red;
+        }
 
-    //    //if the cell is not on one of the edges
-    //    if (((i_Row > 0) && (i_Row < k_Rows - 1)) && ((i_Column > 0) && (i_Column < k_Columns - 1)))
-    //    {
-    //        AddLeftAndRightPositions(i_Column, i_Row, suroundingCells);
-    //        AddAboveAndBelowPositions(i_Column, i_Row, suroundingCells);
-    //    }
+    }
+    IEnumerator doafterWait2(MyUnityNode node, float i_Time, bool i_IsBlue)
+    {
+        yield return new WaitForSeconds(i_Time);
+        node.CellPrefab.GetComponent<Renderer>().material.color = m_DefaultMaterail.color;
+        foreach (IEdge neighbor in m_Graph.GetNeighbors(node))
+        {
+            ((MyUnityNode)neighbor.V).CellPrefab.GetComponent<Renderer>().material.color = m_DefaultMaterail.color;
+        }
 
+    }
+    // END DEBUG CODE====================================================================================================================================
 
-    //    //CORNERS!
-    //    //UpperLeft corner
-    //    else if (i_Row == 0 && i_Column == 0)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row));
-
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row + 1));
-    //    }
-    //    //UpperRight corner
-    //    else if (i_Row == 0 && i_Column == k_Columns - 1)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row));
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row + 1));
-    //    }
-
-    //    //ButtomLeft corner
-    //    else if (i_Row == k_Rows - 1 && i_Column == 0)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row - 1));
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row));
-    //    }
-
-    //    //ButtomRight corner
-    //    else if (i_Row == k_Rows - 1 && i_Column == k_Columns - 1)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row - 1));
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row));
-    //    }
-
-
-    //    //Edge but not a corner
-    //    else if (i_Row == 0)
-    //    {
-
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row + 1));
-    //        AddLeftAndRightPositions(i_Column, i_Row, suroundingCells);
-    //        //Debug.Log("In log: " + suroundingCells.Count);
-    //        //suroundingCells.Add(new Vector3(i_Row + 1, 0, i_Column - 1));
-    //        //suroundingCells.Add(new Vector3(i_Row + 1, 0, i_Column));
-    //        //suroundingCells.Add(new Vector3(i_Row + 1, 0, i_Column + 1));
-    //    }
-    //    else if (i_Row == k_Rows - 1)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row - 1));
-    //        AddLeftAndRightPositions(i_Column, i_Row, suroundingCells);
-    //    }
-    //    else if (i_Column == 0)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row));
-    //        AddAboveAndBelowPositions(i_Column, i_Row, suroundingCells);
-    //    }
-    //    else if (i_Column == k_Columns - 1)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row));
-    //        AddAboveAndBelowPositions(i_Column, i_Row, suroundingCells);
-    //    }
-
-    //    return suroundingCells;
-    //}
-
-    //private IList<Vector3> getSuroundingCellsIncludingDiagonals(int i_Column, int i_Depth, int i_Row)
-    //{
-    //    List<Vector3> suroundingCells = new List<Vector3>();
-
-    //    //if the cell is not on one of the edges
-    //    if (((i_Row > 0) && (i_Row < k_Rows - 1)) && ((i_Column > 0) && (i_Column < k_Columns - 1)))
-    //    {
-    //        AddRowAbovePositions(i_Column, i_Row, suroundingCells);
-    //        AddLeftAndRightPositions(i_Column, i_Row, suroundingCells);
-    //        AddRowBelowPositions(i_Column, i_Row, suroundingCells);
-    //    }
-
-
-    //    //CORNERS!
-    //    //UpperLeft corner
-    //    else if (i_Row == 0 && i_Column == 0)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row));
-
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row + 1));
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row + 1));
-
-    //    }
-    //    //UpperRight corner
-    //    else if (i_Row == 0 && i_Column == k_Columns - 1)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row));
-
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row + 1));
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row + 1));
-    //    }
-
-    //    //ButtomLeft corner
-    //    else if (i_Row == k_Rows - 1 && i_Column == 0)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row - 1));
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row - 1));
-
-    //        suroundingCells.Add(new Vector3(i_Column + 1, 0, i_Row));
-    //    }
-
-    //    //ButtomRight corner
-    //    else if (i_Row == k_Rows - 1 && i_Column == k_Columns - 1)
-    //    {
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row - 1));
-    //        suroundingCells.Add(new Vector3(i_Column, 0, i_Row - 1));
-
-    //        suroundingCells.Add(new Vector3(i_Column - 1, 0, i_Row));
-    //    }
-
-
-    //    //Edge but not a corner
-    //    else if (i_Row == 0)
-    //    {
-    //        AddRowBelowPositions(i_Column, i_Row, suroundingCells);
-    //        AddLeftAndRightPositions(i_Column, i_Row, suroundingCells);
-    //        //Debug.Log("In log: " + suroundingCells.Count);
-    //        //suroundingCells.Add(new Vector3(i_Row + 1, 0, i_Column - 1));
-    //        //suroundingCells.Add(new Vector3(i_Row + 1, 0, i_Column));
-    //        //suroundingCells.Add(new Vector3(i_Row + 1, 0, i_Column + 1));
-    //    }
-    //    else if (i_Row == k_Rows - 1)
-    //    {
-    //        AddRowAbovePositions(i_Column, i_Row, suroundingCells);
-    //        AddLeftAndRightPositions(i_Column, i_Row, suroundingCells);
-    //    }
-    //    else if (i_Column == 0)
-    //    {
-    //        addRightColumn(i_Column, i_Row, suroundingCells);
-    //        AddAboveAndBelowPositions(i_Column, i_Row, suroundingCells);
-    //    }
-    //    else if (i_Column == k_Columns - 1)
-    //    {
-    //        addLeftColumn(i_Column, i_Row, suroundingCells);
-    //        AddAboveAndBelowPositions(i_Column, i_Row, suroundingCells);
-    //    }
-
-    //    return suroundingCells;
-    //}
-
-
-    //private static void addLeftColumn(int x, int z, List<Vector3> suroundingCells)
-    //{
-    //    suroundingCells.Add(new Vector3(x - 1, 0, z - 1));
-
-    //    suroundingCells.Add(new Vector3(x - 1, 0, z));
-    //    suroundingCells.Add(new Vector3(x - 1, 0, z + 1));
-    //}
-
-    //private static void addRightColumn(int x, int z, List<Vector3> suroundingCells)
-    //{
-    //    suroundingCells.Add(new Vector3(x + 1, 0, z - 1));
-
-    //    suroundingCells.Add(new Vector3(x + 1, 0, z));
-    //    suroundingCells.Add(new Vector3(x + 1, 0, z + 1));
-    //}
-
-    //private static void AddRowBelowPositions(int x, int z, List<Vector3> suroundingCells)
-    //{
-    //    suroundingCells.Add(new Vector3(x - 1, 0, z + 1));
-    //    suroundingCells.Add(new Vector3(x, 0, z + 1));
-    //    suroundingCells.Add(new Vector3(x + 1, 0, z + 1));
-    //}
-
-    //private static void AddLeftAndRightPositions(int x, int z, List<Vector3> suroundingCells)
-    //{
-    //    suroundingCells.Add(new Vector3(x - 1, 0, z));
-    //    suroundingCells.Add(new Vector3(x + 1, 0, z));
-    //}
-
-    //private void AddAboveAndBelowPositions(int x, int z, List<Vector3> suroundingCells)
-    //{
-    //    suroundingCells.Add(new Vector3(x, 0, z + 1));
-    //    suroundingCells.Add(new Vector3(x, 0, z - 1));
-    //}
-
-
-    //private static void AddRowAbovePositions(int x, int z, List<Vector3> suroundingCells)
-    //{
-    //    suroundingCells.Add(new Vector3(x - 1, 0, z - 1));
-    //    suroundingCells.Add(new Vector3(x, 0, z - 1));
-    //    suroundingCells.Add(new Vector3(x + 1, 0, z - 1));
-    //}
+    
 }
