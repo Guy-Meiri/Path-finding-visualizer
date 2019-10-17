@@ -64,6 +64,8 @@ namespace Assets
 
         public IList<INode> Dijkstra(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode i_TargetNode)
         {
+            bool isTargetFound = false;
+
             if(!i_Graph.GetAllNodes().Contains(i_StartNode))
             {
                 Console.WriteLine("starting node is not in the graph");
@@ -76,8 +78,8 @@ namespace Assets
 
             foreach (INode node in i_Graph.GetAllNodes())
             {
-                priorityQueue.Enqueue(int.MaxValue, node);
-                distances[node] = int.MaxValue;
+                priorityQueue.Enqueue(int.MaxValue/3, node);
+                distances[node] = int.MaxValue/3;
                 parents[node] = null;
             }
             distances[i_StartNode] = 0;
@@ -104,17 +106,26 @@ namespace Assets
                 }
 
             }
-
-            List<INode> resPath = new List<INode>();
-            INode currentNode = i_TargetNode;
-            while (currentNode != null)
+            //UnityEngine.Debug.Log("distance: " + distances[i_TargetNode]);
+            if (distances[i_TargetNode] == int.MaxValue)
             {
-                resPath.Insert(0, currentNode);
-                currentNode = parents[currentNode];
+                
+                return null;
             }
-            return resPath;
+                
+            else
+            {
+                List<INode> resPath = new List<INode>();
+                INode currentNode = i_TargetNode;
+                while (currentNode != null)
+                {
+                    resPath.Insert(0, currentNode);
+                    currentNode = parents[currentNode];
+                }
+                return resPath;
+            }
+           
         }
-
 
     }
 }

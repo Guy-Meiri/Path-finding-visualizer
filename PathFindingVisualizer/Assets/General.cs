@@ -24,7 +24,7 @@ public class General : MonoBehaviour
     private bool m_IsStartNodePicked = false;
     private bool m_IsTargetNodePicked = false;
     private bool m_IspathDrawn = false;
-    private bool m_IsCurrentlyDrawing = false;
+    //private bool m_IsCurrentlyDrawing = false;
 
     private GameObject m_StartNodeGameObject;
     private GameObject m_TargetNodeGameObject;
@@ -67,7 +67,8 @@ public class General : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit) && !m_IsCurrentlyDrawing)
+        //if (Physics.Raycast(ray, out hit) && !m_IsCurrentlyDrawing)
+        if (Physics.Raycast(ray, out hit))
         {
             GameObject currentCellObject = hit.transform.gameObject;
             Renderer renderer = currentCellObject.GetComponent<Renderer>();
@@ -123,10 +124,9 @@ public class General : MonoBehaviour
                 //}
                 
             }
-
+            calcAndDrawPathIfNeeded();
         }
 
-        calcAndDrawPathIfNeeded();
     }
 
     private void clearObstacleNodeIfIsColliding(GameObject i_CellGameObject, Renderer i_Renderer)
@@ -137,11 +137,26 @@ public class General : MonoBehaviour
             int nodeId = getNodeIdFromCellGameObject(i_CellGameObject);
             MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(nodeId);
             IList<Vector3> suroundingCells = m_NeighborsPositionCalculator.GetSuroundingCells((int)node.Position.x, (int)node.Position.y, (int)node.Position.z);
-            
-            foreach(Vector3 cellPosition in suroundingCells)
+
+            //Debug.Log("Before: ");
+            //{
+            //    foreach (IEdge edge in m_Graph.GetNeighbors(node))
+            //    {
+            //        Debug.Log("id: " + edge.V.Id);
+            //    }
+            //}
+            foreach (Vector3 cellPosition in suroundingCells)
             {
                 m_Graph.AddEdgeOfNodesById(nodeId, getIdFromPosition(cellPosition), m_DefaultWeight);
             }
+
+            //Debug.Log("After: ");
+            //{
+            //    foreach(IEdge edge in m_Graph.GetNeighbors(node))
+            //    {
+            //        Debug.Log("id: " + edge.Weight);
+            //    }
+            //}
             
         }
     }
@@ -157,10 +172,15 @@ public class General : MonoBehaviour
         {
             if (!m_IspathDrawn)
             {
-                m_IsCurrentlyDrawing = true;
-                clearBoard();
+                
                 IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                drawPath(res);
+                clearBoard();
+                if (res != null)
+                {
+                    //m_IsCurrentlyDrawing = true;
+                    drawPath(res);
+                    
+                }
                 m_IspathDrawn = true;
             }
         }
@@ -319,16 +339,23 @@ public class General : MonoBehaviour
 
     private void drawPath(IList<INode> res)
     {
-        int nodesDrawnCount = 0;
-        for (int i = 1; i < res.Count - 1; i++)
+        if (res != null)
         {
-            StartCoroutine(colorCellAfterSeconds(((MyUnityNode)res[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed));
-            nodesDrawnCount++;
-            if(i == res.Count - 2)
+            int nodesDrawnCount = 0;
+            for (int i = 1; i < res.Count - 1; i++)
             {
-                m_IsCurrentlyDrawing = false;
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)res[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed));
+                nodesDrawnCount++;
+                //if (i == res.Count - 2)
+                //{
+                //    m_IsCurrentlyDrawing = false;
+                //}
             }
         }
+        //else
+        //{
+        //    m_IsCurrentlyDrawing = false;
+        //}
     }
 
     private int getNodeIdFromCellGameObject(GameObject i_Cell)

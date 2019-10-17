@@ -1,0 +1,1 @@
+﻿- when deselecting an obstacle, it seems it doesn't return the edges correctly.
