@@ -13,29 +13,31 @@ namespace Assets
 
         public MyNode(int m_Id, int m_Data)
         {
-            this.m_Id = m_Id;
+            this.Id = m_Id;
             this.m_Data = m_Data;
         }
+
+        public int Id { get => m_Id; set => m_Id = value; }
 
         public override bool Equals(object obj)
         {
             var node = obj as MyNode;
             return node != null &&
-                   m_Id == node.m_Id;
+                   Id == node.Id;
         }
 
         public override int GetHashCode()
         {
-            return -1501183392 + m_Id.GetHashCode();
+            return -1501183392 + Id.GetHashCode();
         }
 
         public int GetNodeId()
         {
-            return m_Id;
+            return Id;
         }
         public override string ToString()
         {
-            return m_Id.ToString();
+            return Id.ToString();
         }
     }
 }

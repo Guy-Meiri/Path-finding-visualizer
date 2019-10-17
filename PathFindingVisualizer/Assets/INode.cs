@@ -9,5 +9,6 @@ namespace Assets
     public interface INode
     {
         int GetNodeId();
+        int Id { get; set; }
     }
 }

@@ -60,8 +60,6 @@ public class General : MonoBehaviour
     }
 
 
-
-
     void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -311,6 +309,8 @@ public class General : MonoBehaviour
     // DEBUG CODE ====================================================================================================================================
     private void debugDrawBoard()
     {
+        m_Graph.RemoveNodeEdgesById(2);
+        m_Graph.RemoveNodeEdgesById(7);
         int i = 0;
         bool i_IsBlue = true;
         foreach (MyUnityNode node in m_Graph.GetAllNodes())

@@ -125,5 +125,40 @@ namespace Assets
             }
         }
 
+        public void RemoveEdge(IEdge i_Edge)
+        {
+            List<IEdge> neighbors;
+            if (m_Graph.TryGetValue(i_Edge.U, out neighbors))
+            {
+                foreach (IEdge edge in neighbors.ToList())
+                {
+                    if (edge == i_Edge)
+                    {
+                        neighbors.Remove(i_Edge);
+                    }
+                }
+            }
+        }
+
+        public void RemoveNodeEdges(INode i_Node)
+        {
+            foreach( IEdge edge in GetAllEdges())
+            {
+                if(edge.U.Id == i_Node.Id || edge.V.Id == i_Node.Id)
+                {
+                    RemoveEdge(edge);
+                }
+            }
+        }
+
+        public void RemoveNodeEdgesById(int i_Id)
+        {
+            INode node = GetNodeById(i_Id); 
+            if(node != null)
+            {
+                RemoveNodeEdges(node);
+            }
+        }
+
     }
 }
