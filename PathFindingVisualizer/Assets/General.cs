@@ -38,6 +38,9 @@ public class General : MonoBehaviour
     [SerializeField]
     private Material m_DefaultMaterail;
 
+    [SerializeField]
+    private Material m_ObstacleMaterial;
+
     private PathFinder m_Pathfinder;
     private readonly int k_StartNodeSelection = 0;
     private readonly int k_ClearNodeSelection = 0;
@@ -47,7 +50,7 @@ public class General : MonoBehaviour
     private Color m_StartColor = Color.blue;
     private Color m_TargetColor = Color.cyan;
     private Color m_PathColor = Color.green;
-    private Color m_ObstacleColor = Color.red;
+    //private Color m_ObstacleColor = Color.red;
     private NeighborsPositionCalculator m_NeighborsPositionCalculator;
 
 
@@ -111,11 +114,11 @@ public class General : MonoBehaviour
                 clearTargetNodeIfIsColliding(currentCellObject, renderer);
 
                 //update node and neighbors
-                if(renderer.material.color != m_ObstacleColor)
+                if(renderer.material.color != m_ObstacleMaterial.color)
                 {
                     int id = getNodeIdFromCellGameObject(currentCellObject);
                     m_Graph.RemoveNodeEdgesById(id);
-                    renderer.material.color = m_ObstacleColor;
+                    renderer.material.color = m_ObstacleMaterial.color;
                 }
                 
                 //foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
@@ -132,7 +135,7 @@ public class General : MonoBehaviour
     private void clearObstacleNodeIfIsColliding(GameObject i_CellGameObject, Renderer i_Renderer)
     {
         
-        if(i_Renderer.material.color == m_ObstacleColor)
+        if(i_Renderer.material.color == m_ObstacleMaterial.color)
         {
             int nodeId = getNodeIdFromCellGameObject(i_CellGameObject);
             MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(nodeId);
@@ -148,6 +151,7 @@ public class General : MonoBehaviour
             foreach (Vector3 cellPosition in suroundingCells)
             {
                 m_Graph.AddEdgeOfNodesById(nodeId, getIdFromPosition(cellPosition), m_DefaultWeight);
+                m_Graph.AddEdgeOfNodesById(getIdFromPosition(cellPosition), nodeId, m_DefaultWeight);
             }
 
             //Debug.Log("After: ");
@@ -328,8 +332,8 @@ public class General : MonoBehaviour
             Material defaultMaterial = node.CellPrefab.GetComponent<CellPrefabScript>().DefaultMaterial;
 
             Material currCellMaterial = node.CellPrefab.GetComponent<Renderer>().material;
-            //if(currCellMaterial.color != Color.red && currCellMaterial.color != Color.blue && currCellMaterial.color != Color.cyan)
-            if (currCellMaterial.color != Color.red && node.GetNodeId() != m_StartingNode.GetNodeId() && node.GetNodeId() != m_TargetNode.GetNodeId())
+            
+            if (currCellMaterial.color != m_ObstacleMaterial.color && node.GetNodeId() != m_StartingNode.GetNodeId() && node.GetNodeId() != m_TargetNode.GetNodeId())
             {
                 node.CellPrefab.GetComponent<Renderer>().material = defaultMaterial;
             }
