@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Assets
 {
@@ -158,6 +159,11 @@ namespace Assets
             {
                 RemoveNodeEdges(node);
             }
+        }
+
+        internal void AddEdgeOfNodesById(int u_Id, int v_Id, int i_Weight)
+        {
+            AddEdge(new MyEdge(GetNodeById(u_Id), GetNodeById(v_Id), i_Weight));
         }
 
     }

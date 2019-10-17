@@ -144,9 +144,9 @@ MonoBehaviour:
   m_MainCamera: {fileID: 534669904}
   m_CellPrefab: {fileID: 2934146055552836992, guid: b84e7a356aef6254999f67add540589b,
     type: 3}
-  k_Rows: 8
-  k_Columns: 8
-  m_DrawSpeed: 0.43
+  k_Rows: 12
+  k_Columns: 12
+  m_DrawSpeed: 0.09
   m_DefaultMaterail: {fileID: 2100000, guid: 7cb542c7c3e4b834b954b0dfead6c04a, type: 2}
 --- !u!4 &67960152
 Transform:

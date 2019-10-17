@@ -49,13 +49,15 @@ public class General : MonoBehaviour
     private Color m_PathColor = Color.green;
     private Color m_ObstacleColor = Color.red;
     private NeighborsPositionCalculator m_NeighborsPositionCalculator;
+
+
     void Start()
     {
         m_Graph = new MyDirectedGraph();
         m_Pathfinder = new PathFinder();
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
         buildGraph();
-        debugDrawBoard();
+        //debugDrawBoard();
         positionMainCamera();
     }
 
@@ -73,8 +75,9 @@ public class General : MonoBehaviour
 
             if (Input.GetKey(KeyCode.X))
             {
-                clearStartNodeIfNeededColliding(currentCellObject, renderer);
-                clearTargetNodeIfNeededColliding(currentCellObject, renderer);
+                clearStartNodeIfIsNeededColliding(currentCellObject, renderer);
+                clearTargetNodeIfIsColliding(currentCellObject, renderer);
+                clearObstacleNodeIfIsColliding(currentCellObject, renderer); // adds edges if its removing an obstacle
 
                 //update Weights
                 int currentNodeId = getNodeIdFromCellGameObject(currentCellObject);
@@ -103,21 +106,49 @@ public class General : MonoBehaviour
             }
             else if (Input.GetMouseButton(k_ObstacleNodeSelection))
             {
-                clearStartNodeIfNeededColliding(currentCellObject, renderer);
-                clearTargetNodeIfNeededColliding(currentCellObject, renderer);
+                clearStartNodeIfIsNeededColliding(currentCellObject, renderer);
+                clearTargetNodeIfIsColliding(currentCellObject, renderer);
 
                 //update node and neighbors
-                int id = getNodeIdFromCellGameObject(currentCellObject);
-                foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
+                if(renderer.material.color != m_ObstacleColor)
                 {
-                    m_Graph.UpdateWeight(neighbor, 1000);
+                    int id = getNodeIdFromCellGameObject(currentCellObject);
+                    m_Graph.RemoveNodeEdgesById(id);
+                    renderer.material.color = m_ObstacleColor;
                 }
-                renderer.material.color = m_ObstacleColor;
+                
+                //foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
+                //{
+                //    m_Graph.UpdateWeight(neighbor, 1000);
+                //}
+                
             }
 
         }
 
         calcAndDrawPathIfNeeded();
+    }
+
+    private void clearObstacleNodeIfIsColliding(GameObject i_CellGameObject, Renderer i_Renderer)
+    {
+        
+        if(i_Renderer.material.color == m_ObstacleColor)
+        {
+            int nodeId = getNodeIdFromCellGameObject(i_CellGameObject);
+            MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(nodeId);
+            IList<Vector3> suroundingCells = m_NeighborsPositionCalculator.GetSuroundingCells((int)node.Position.x, (int)node.Position.y, (int)node.Position.z);
+            
+            foreach(Vector3 cellPosition in suroundingCells)
+            {
+                m_Graph.AddEdgeOfNodesById(nodeId, getIdFromPosition(cellPosition), m_DefaultWeight);
+            }
+            
+        }
+    }
+
+    private int getIdFromPosition(Vector3 pos)
+    {
+        return (int)(pos.z * k_Columns + pos.x);
     }
 
     private void calcAndDrawPathIfNeeded()
@@ -213,7 +244,7 @@ public class General : MonoBehaviour
         }
     }
 
-    private void clearStartNodeIfNeededColliding(GameObject i_CellGameObject, Renderer selectionRenderer)
+    private void clearStartNodeIfIsNeededColliding(GameObject i_CellGameObject, Renderer selectionRenderer)
     {
         if (m_IsStartNodePicked)
         {
@@ -229,7 +260,7 @@ public class General : MonoBehaviour
         }
     }
 
-    private void clearTargetNodeIfNeededColliding(GameObject i_CellGameObject, Renderer selectionRenderer)
+    private void clearTargetNodeIfIsColliding(GameObject i_CellGameObject, Renderer selectionRenderer)
     {
         if (m_IsTargetNodePicked)
         {
