@@ -41,6 +41,9 @@ public class General : MonoBehaviour
     [SerializeField]
     private Material m_ObstacleMaterial;
 
+    [SerializeField]
+    private Material m_PathMaterial;
+
     private PathFinder m_Pathfinder;
     private readonly int k_StartNodeSelection = 0;
     private readonly int k_ClearNodeSelection = 0;
@@ -49,7 +52,7 @@ public class General : MonoBehaviour
 
     private Color m_StartColor = Color.blue;
     private Color m_TargetColor = Color.cyan;
-    private Color m_PathColor = Color.green;
+    //private Color m_PathColor = Color.green;
     //private Color m_ObstacleColor = Color.red;
     private NeighborsPositionCalculator m_NeighborsPositionCalculator;
 
@@ -176,19 +179,66 @@ public class General : MonoBehaviour
         {
             if (!m_IspathDrawn)
             {
-                
-                IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+
+                //                IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                //Tuple<IList<Tuple<INode, int>>, IList<INode>>  
+                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
                 clearBoard();
-                if (res != null)
+                if (res != null && res.Item2 != null)
                 {
                     //m_IsCurrentlyDrawing = true;
-                    drawPath(res);
+                    //drawPath(res.Item2);
+                    drawDistancesAndPath(res.Item1, res.Item2);
                     
+
                 }
                 m_IspathDrawn = true;
             }
         }
         
+    }
+
+    private void drawDistancesAndPath(IList<Tuple<INode, int>> i_Distances, IList<INode> i_Path)
+    {
+        if (i_Distances != null && i_Path != null)
+        {
+            //draw distances
+            int nodesDrawnCount = 0;
+
+            float maxDistance = getMaxDistance(i_Distances);
+            for (int i = 1; i < i_Distances.Count - 1; i++)
+            {
+                int distance = i_Distances[i].Item2;
+                float colorLevel = distance / maxDistance;
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Distances[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.yellow*colorLevel + Color.red * (1f-colorLevel)));
+                nodesDrawnCount++;
+            }
+
+            //draw final path
+            for (int i = 1; i < i_Path.Count - 1; i++)
+            {
+                int distance = i_Distances[i].Item2;
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Path[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed, m_PathMaterial.color));
+                nodesDrawnCount++;
+                
+            }
+        }
+    }
+
+    private float getMaxDistance(IList<Tuple<INode, int>> i_Distances)
+    {
+        if (i_Distances == null)
+            return 0;
+        else
+        {
+            int max = i_Distances[0].Item2;
+            foreach(Tuple<INode, int> nodeAndDistance in i_Distances)
+            {
+                if (max < nodeAndDistance.Item2)
+                    max = nodeAndDistance.Item2;
+            }
+            return max;
+        }
     }
 
     private void buildGraph()
@@ -238,10 +288,10 @@ public class General : MonoBehaviour
 
     }
 
-    IEnumerator colorCellAfterSeconds(GameObject i_Cell, float i_TimeToWait)
+    IEnumerator colorCellAfterSeconds(GameObject i_Cell, float i_TimeToWait,Color i_Color)
     {
         yield return new WaitForSeconds(i_TimeToWait);
-        i_Cell.GetComponent<Renderer>().material.color = Color.green;
+        i_Cell.GetComponent<Renderer>().material.color = i_Color;
     }
 
     private void clearStartNode(GameObject i_CellGameObject, Renderer selectionRenderer)
@@ -348,7 +398,7 @@ public class General : MonoBehaviour
             int nodesDrawnCount = 0;
             for (int i = 1; i < res.Count - 1; i++)
             {
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)res[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)res[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed, m_PathMaterial.color));
                 nodesDrawnCount++;
                 //if (i == res.Count - 2)
                 //{
