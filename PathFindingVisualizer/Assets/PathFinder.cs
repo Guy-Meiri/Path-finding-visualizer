@@ -272,7 +272,7 @@ namespace Assets
                 parents[node] = null;
             }
             gScore[i_StartNode] = 0;
-            fScorePriorityQueue.Enqueue(aStartHeuristic(i_Graph, (MyUnityNode)i_StartNode, (MyUnityNode)i_TargetNode), i_StartNode);
+            fScorePriorityQueue.Enqueue(manhattanDistance(i_Graph, (MyUnityNode)i_StartNode, (MyUnityNode)i_TargetNode), i_StartNode);
             distancesHistory.Add(new Tuple<INode, int>(i_StartNode, 0));
             
 
@@ -296,7 +296,7 @@ namespace Assets
                                 parents[neighbor.V] = minNode;
                                 gScore[neighbor.V] = tentative_gScore;
 
-                                fScorePriorityQueue.UpdatePriority(neighbor.V, tentative_gScore + aStartHeuristic(i_Graph, (MyUnityNode)neighbor.V, (MyUnityNode)i_TargetNode));
+                                fScorePriorityQueue.UpdatePriority(neighbor.V, tentative_gScore + manhattanDistance(i_Graph, (MyUnityNode)neighbor.V, (MyUnityNode)i_TargetNode));
                                 
                                 if (neighbor.V.Id != i_TargetNode.Id)
                                 {
@@ -332,6 +332,14 @@ namespace Assets
         private int aStartHeuristic(MyAbstractGraph<INode, IEdge> i_Graph, MyUnityNode i_currentNode, MyUnityNode i_TargetNode)
         {
             return (int)UnityEngine.Vector3.Distance(i_currentNode.Position, i_TargetNode.Position);
+        }
+
+        private int manhattanDistance(MyAbstractGraph<INode, IEdge> i_Graph, MyUnityNode i_currentNode, MyUnityNode i_TargetNode)
+        {
+            UnityEngine.Vector3 n1 = i_currentNode.Position;
+            UnityEngine.Vector3 n2 = i_TargetNode.Position;
+
+            return (int)(Math.Abs(n1.x - n2.x) + Math.Abs(n1.y - n2.y) + Math.Abs(n1.z - n2.z));
         }
     }
 
