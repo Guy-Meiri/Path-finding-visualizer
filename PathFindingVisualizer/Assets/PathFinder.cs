@@ -8,6 +8,9 @@ namespace Assets
 {
     class PathFinder
     {
+
+        public enum NodeStatus { Unvisited = 0, Visited = 1, Done = 2 };
+
         public IList<INode> BlemanFordSearch(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode I_TargetNode)
         {
             List<INode> resPath = new List<INode>();
@@ -57,7 +60,7 @@ namespace Assets
                 currentNode = parents[currentNode];
             }
 
-            
+
             return resPath;
         }
 
@@ -66,7 +69,7 @@ namespace Assets
         {
             bool isTargetFound = false;
 
-            if(!i_Graph.GetAllNodes().Contains(i_StartNode))
+            if (!i_Graph.GetAllNodes().Contains(i_StartNode))
             {
                 Console.WriteLine("starting node is not in the graph");
                 return null;
@@ -78,13 +81,13 @@ namespace Assets
 
             foreach (INode node in i_Graph.GetAllNodes())
             {
-                priorityQueue.Enqueue(int.MaxValue/3, node);
-                distances[node] = int.MaxValue/3;
+                priorityQueue.Enqueue(int.MaxValue / 3, node);
+                distances[node] = int.MaxValue / 3;
                 parents[node] = null;
             }
             distances[i_StartNode] = 0;
             priorityQueue.UpdatePriority(i_StartNode, 0);
-           
+
             while (priorityQueue.Count != 0)
             {
                 INode minNode = priorityQueue.Dequeue();
@@ -109,10 +112,10 @@ namespace Assets
             //UnityEngine.Debug.Log("distance: " + distances[i_TargetNode]);
             if (distances[i_TargetNode] == int.MaxValue)
             {
-                
+
                 return null;
             }
-                
+
             else
             {
                 List<INode> resPath = new List<INode>();
@@ -124,14 +127,14 @@ namespace Assets
                 }
                 return resPath;
             }
-           
+
         }
 
 
         //returns
         //1. list of tuples - (node, distance)
         //2. list of the result path
-        public Tuple<IList<Tuple<INode,int>>,IList<INode>> DijkstraWithDistances(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode i_TargetNode)
+        public Tuple<IList<Tuple<INode, int>>, IList<INode>> DijkstraWithDistances(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode i_TargetNode)
         {
 
             if (!i_Graph.GetAllNodes().Contains(i_StartNode))
@@ -158,7 +161,7 @@ namespace Assets
             while (priorityQueue.Count != 0)
             {
                 INode minNode = priorityQueue.Dequeue();
-                if(minNode.Id == i_TargetNode.Id)
+                if (minNode.Id == i_TargetNode.Id)
                 {
                     break;
                 }
@@ -171,11 +174,11 @@ namespace Assets
                         {
                             {
                                 distances[neighbor.V] = newDistance;
-                                
-                                
+
+
                                 priorityQueue.UpdatePriority(neighbor.V, newDistance);
                                 parents[neighbor.V] = minNode;
-                                if(neighbor.V.Id != i_TargetNode.Id)
+                                if (neighbor.V.Id != i_TargetNode.Id)
                                 {
                                     distancesHistory.Add(new Tuple<INode, int>(neighbor.V, newDistance));
                                 }
@@ -205,5 +208,43 @@ namespace Assets
             }
 
         }
+
+        public IList<Tuple<INode, NodeStatus>> DFS(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode)
+        {
+            Dictionary<INode, NodeStatus> visitStatus = new Dictionary<INode, NodeStatus>();
+            List<Tuple<INode, NodeStatus>> resultVisitedOrder = new List<Tuple<INode, NodeStatus>>();
+
+            foreach (INode node in i_Graph.GetAllNodes())
+                visitStatus[node] = NodeStatus.Unvisited;
+
+            foreach (INode node in i_Graph.GetAllNodes())
+            {
+                if (visitStatus[node] == NodeStatus.Unvisited && !node.IsObstacle)
+                {
+                    visit(i_Graph, node, visitStatus, resultVisitedOrder);
+                }
+            }
+
+            return resultVisitedOrder;
+        }
+
+        private void visit(MyAbstractGraph<INode, IEdge> i_Graph, INode i_Root, Dictionary<INode, NodeStatus> i_VisitStatus, List<Tuple<INode, NodeStatus>> i_VisitedOrder)
+        {
+            i_VisitStatus[i_Root] = NodeStatus.Visited;
+            i_VisitedOrder.Add(new Tuple<INode, NodeStatus>(i_Root, NodeStatus.Visited));
+
+            foreach (IEdge edge in i_Graph.GetNeighbors(i_Root))
+            {
+                if (i_VisitStatus[edge.V] == NodeStatus.Unvisited && !edge.V.IsObstacle)
+                {
+                    visit(i_Graph, edge.V, i_VisitStatus, i_VisitedOrder);
+                }
+            }
+
+            i_VisitStatus[i_Root] = NodeStatus.Done;
+            i_VisitedOrder.Add(new Tuple<INode, NodeStatus>(i_Root, NodeStatus.Done));
+        }
     }
+
+
 }

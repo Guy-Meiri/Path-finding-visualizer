@@ -186,20 +186,55 @@ public class General : MonoBehaviour
 
                 //                IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
                 //Tuple<IList<Tuple<INode, int>>, IList<INode>>  
-                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+
+
+                //===========================================do Dikstra With Distances//===========================================
+                //Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                //clearBoard();
+                //if (res != null && res.Item2 != null)
+                //{
+                //    //m_IsCurrentlyDrawing = true;
+                //    //drawPath(res.Item2);
+                //    drawDistancesAndPath(res.Item1, res.Item2);
+                //}
+                //===========================================enddo Dikstra With Distances//===========================================
+
+                //===========================================do DFS //===========================================
+                IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder = m_Pathfinder.DFS(m_Graph, m_StartingNode);
                 clearBoard();
-                if (res != null && res.Item2 != null)
+                if (visitedOrder != null)
                 {
-                    //m_IsCurrentlyDrawing = true;
-                    //drawPath(res.Item2);
-                    drawDistancesAndPath(res.Item1, res.Item2);
-
-
+                    drawDfs(visitedOrder);
                 }
+
+                //===========================================END OF do DFS //===========================================
+
+
+
+
                 m_IspathDrawn = true;
             }
         }
 
+    }
+
+    private void drawDfs(IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder)
+    {
+        int nodesDrawnCount = 0;
+
+        for (int i = 1; i < visitedOrder.Count; i++)
+        {
+            PathFinder.NodeStatus status = visitedOrder[i].Item2;
+            if(status == PathFinder.NodeStatus.Visited)
+            {
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)visitedOrder[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.magenta));
+            }
+            else if(status == PathFinder.NodeStatus.Done)
+            {
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)visitedOrder[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.red));
+            }
+            nodesDrawnCount++;
+        }
     }
 
     private void drawDistancesAndPath(IList<Tuple<INode, int>> i_Distances, IList<INode> i_Path)

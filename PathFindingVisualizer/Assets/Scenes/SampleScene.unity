@@ -223,7 +223,7 @@ MonoBehaviour:
     type: 3}
   k_Rows: 14
   k_Columns: 14
-  m_DrawSpeed: 0.01
+  m_DrawSpeed: 0.03
   m_DefaultMaterail: {fileID: 2100000, guid: 7cb542c7c3e4b834b954b0dfead6c04a, type: 2}
   m_ObstacleMaterial: {fileID: 2100000, guid: 83e2b3623f4277846b97dc50043a73c8, type: 2}
   m_PathMaterial: {fileID: 2100000, guid: 2a71fe8ad8cb37142ab00b409cb07661, type: 2}

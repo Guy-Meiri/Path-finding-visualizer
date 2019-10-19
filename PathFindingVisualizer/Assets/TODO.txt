@@ -1,1 +1,15 @@
-﻿- when deselecting an obstacle, it seems it doesn't return the edges correctly.
+﻿init a hash table hashStatus that marks every nodes status
+
+for every node
+	if node.status == unvisited
+		visit(node)
+
+visit(node){
+	hashStatus[node] = visited (gray);
+
+	for every neighbor of node
+		if(neighbor.status == unvisited)
+			visit(neighbor)
+
+	hashStatus[node]= done
+}
