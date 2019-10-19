@@ -199,14 +199,27 @@ public class General : MonoBehaviour
                 //}
                 //===========================================enddo Dikstra With Distances//===========================================
 
-                //===========================================do DFS //===========================================
-                IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder = m_Pathfinder.DFS(m_Graph, m_StartingNode);
-                clearBoard();
-                if (visitedOrder != null)
-                {
-                    drawDfs(visitedOrder);
-                }
 
+                //===========================================do aStar With Distances//===========================================
+                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.AstarSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                clearBoard();
+                if (res != null && res.Item2 != null)
+                {
+                    //m_IsCurrentlyDrawing = true;
+                    //drawPath(res.Item2);
+                    drawDistancesAndPath(res.Item1, res.Item2);
+                }
+                //===========================================enddo aStar With Distances//===========================================
+
+
+
+                //===========================================do DFS //===========================================
+                //IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder = m_Pathfinder.DFS(m_Graph, m_StartingNode);
+                //clearBoard();
+                //if (visitedOrder != null)
+                //{
+                //    drawDfs(visitedOrder);
+                //}
                 //===========================================END OF do DFS //===========================================
 
 

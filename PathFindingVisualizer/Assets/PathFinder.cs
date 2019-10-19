@@ -244,6 +244,95 @@ namespace Assets
             i_VisitStatus[i_Root] = NodeStatus.Done;
             i_VisitedOrder.Add(new Tuple<INode, NodeStatus>(i_Root, NodeStatus.Done));
         }
+
+
+        //returns
+        //1. list of tuples - (node, distance)
+        //2. list of the result path
+        public Tuple<IList<Tuple<INode, int>>, IList<INode>> AstarSearch(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode i_TargetNode)
+        {
+            if (!i_Graph.GetAllNodes().Contains(i_StartNode))
+            {
+                Console.WriteLine("starting node is not in the graph");
+                return null;
+            }
+
+            List<Tuple<INode, int>> distancesHistory = new List<Tuple<INode, int>>();
+            PriorityQueueCopied<INode> fScorePriorityQueue = new PriorityQueueCopied<INode>(true); // For node n, fScore[n] := gScore[n] + h(n).
+            Dictionary<INode, int> gScore = new Dictionary<INode, int>(); // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
+            Dictionary<INode, INode> parents = new Dictionary<INode, INode>();
+
+            foreach (INode node in i_Graph.GetAllNodes())
+            {
+                if(node.Id != i_StartNode.Id)
+                {
+                    fScorePriorityQueue.Enqueue(int.MaxValue / 3, node);
+                    gScore[node] = int.MaxValue / 3;
+                }
+                parents[node] = null;
+            }
+            gScore[i_StartNode] = 0;
+            fScorePriorityQueue.Enqueue(aStartHeuristic(i_Graph, (MyUnityNode)i_StartNode, (MyUnityNode)i_TargetNode), i_StartNode);
+            distancesHistory.Add(new Tuple<INode, int>(i_StartNode, 0));
+            
+
+            while (fScorePriorityQueue.Count != 0)
+            {
+                INode minNode = fScorePriorityQueue.Dequeue();
+                if (minNode.Id == i_TargetNode.Id)
+                {
+                    break;
+                }
+
+                foreach (IEdge neighbor in i_Graph.GetNeighbors(minNode))
+                {
+                    if (fScorePriorityQueue.IsInQueue(neighbor.V))// not sure if i need this line!
+                    {
+
+                        int tentative_gScore = gScore[minNode] + neighbor.GetWeight();
+                        if (tentative_gScore < gScore[neighbor.V])
+                        {
+                            {
+                                parents[neighbor.V] = minNode;
+                                gScore[neighbor.V] = tentative_gScore;
+
+                                fScorePriorityQueue.UpdatePriority(neighbor.V, tentative_gScore + aStartHeuristic(i_Graph, (MyUnityNode)neighbor.V, (MyUnityNode)i_TargetNode));
+                                
+                                if (neighbor.V.Id != i_TargetNode.Id)
+                                {
+                                    distancesHistory.Add(new Tuple<INode, int>(neighbor.V, tentative_gScore));
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+            }
+            //UnityEngine.Debug.Log("distance: " + distances[i_TargetNode]);
+            if (gScore[i_TargetNode] == int.MaxValue)
+            {
+                return null;
+            }
+
+            else
+            {
+                List<INode> resPath = new List<INode>();
+                INode currentNode = i_TargetNode;
+                while (currentNode != null)
+                {
+                    resPath.Insert(0, currentNode);
+                    currentNode = parents[currentNode];
+                }
+                return Tuple.Create<IList<Tuple<INode, int>>, IList<INode>>(distancesHistory, resPath);
+            }
+
+        }
+
+        private int aStartHeuristic(MyAbstractGraph<INode, IEdge> i_Graph, MyUnityNode i_currentNode, MyUnityNode i_TargetNode)
+        {
+            return (int)UnityEngine.Vector3.Distance(i_currentNode.Position, i_TargetNode.Position);
+        }
     }
 
 
