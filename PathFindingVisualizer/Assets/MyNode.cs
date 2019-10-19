@@ -10,14 +10,18 @@ namespace Assets
     {
         private int m_Id;
         private int m_Data;
+        private bool m_IsObstacle;
 
-        public MyNode(int m_Id, int m_Data)
+        public MyNode(int i_Id, int i_Data, bool i_IsObtacle = false)
         {
-            this.Id = m_Id;
-            this.m_Data = m_Data;
+            this.Id = i_Id;
+            this.m_Data = i_Data;
+            m_IsObstacle = i_IsObtacle;
         }
 
         public int Id { get => m_Id; set => m_Id = value; }
+        public bool IsObstacle { get => m_IsObstacle; set => m_IsObstacle = value; }
+        
 
         public override bool Equals(object obj)
         {

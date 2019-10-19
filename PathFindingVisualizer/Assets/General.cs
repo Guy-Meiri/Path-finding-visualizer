@@ -6,7 +6,6 @@ using System;
 
 public class General : MonoBehaviour
 {
-
     [SerializeField]
     private Camera m_MainCamera;
 
@@ -24,7 +23,6 @@ public class General : MonoBehaviour
     private bool m_IsStartNodePicked = false;
     private bool m_IsTargetNodePicked = false;
     private bool m_IspathDrawn = false;
-    //private bool m_IsCurrentlyDrawing = false;
 
     private GameObject m_StartNodeGameObject;
     private GameObject m_TargetNodeGameObject;
@@ -73,7 +71,6 @@ public class General : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        //if (Physics.Raycast(ray, out hit) && !m_IsCurrentlyDrawing)
         if (Physics.Raycast(ray, out hit))
         {
             GameObject currentCellObject = hit.transform.gameObject;
@@ -82,18 +79,28 @@ public class General : MonoBehaviour
 
             if (Input.GetKey(KeyCode.X))
             {
-                clearStartNodeIfIsNeededColliding(currentCellObject, renderer);
+                clearStartNodeIfIsColliding(currentCellObject, renderer);
                 clearTargetNodeIfIsColliding(currentCellObject, renderer);
-                clearObstacleNodeIfIsColliding(currentCellObject, renderer); // adds edges if its removing an obstacle
+                int id = getNodeIdFromCellGameObject(currentCellObject);
+                MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(id);
+                if (node.IsObstacle)
+                {
+                    clearObstacleNodeIfIsColliding(currentCellObject, renderer); // adds edges if its removing an obstacle }
+                }
 
-                //update Weights
-                int currentNodeId = getNodeIdFromCellGameObject(currentCellObject);
-                updateWeights(currentNodeId, m_DefaultWeight);
+                //else
+                //{
+                //    //update Weights
+                //    int currentNodeId = getNodeIdFromCellGameObject(currentCellObject);
+                //    updateWeights(currentNodeId, m_DefaultWeight);
+                //}
                 renderer.material.color = m_DefaultMaterail.color;
+
             }
             else if (Input.GetMouseButtonDown(k_StartNodeSelection))
             {
                 clearStartNode(currentCellObject, renderer);
+                clearObstacleNodeIfIsColliding(currentCellObject, renderer);
                 m_IsStartNodePicked = true;
                 m_StartNodeGameObject = currentCellObject;
                 m_StartingNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject));
@@ -104,6 +111,7 @@ public class General : MonoBehaviour
             else if (Input.GetMouseButtonDown(k_TargetNodeSelection))
             {
                 clearTargetNode(currentCellObject, renderer);
+                clearObstacleNodeIfIsColliding(currentCellObject, renderer);
                 m_IsTargetNodePicked = true;
                 m_TargetNodeGameObject = currentCellObject;
                 m_TargetNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject));
@@ -113,60 +121,56 @@ public class General : MonoBehaviour
             }
             else if (Input.GetMouseButton(k_ObstacleNodeSelection))
             {
-                clearStartNodeIfIsNeededColliding(currentCellObject, renderer);
+                clearStartNodeIfIsColliding(currentCellObject, renderer);
                 clearTargetNodeIfIsColliding(currentCellObject, renderer);
 
                 //update node and neighbors
-                if(renderer.material.color != m_ObstacleMaterial.color)
+                if (renderer.material.color != m_ObstacleMaterial.color)
                 {
                     int id = getNodeIdFromCellGameObject(currentCellObject);
                     m_Graph.RemoveNodeEdgesById(id);
+                    m_Graph.GetNodeById(id).IsObstacle = true;
                     renderer.material.color = m_ObstacleMaterial.color;
                 }
-                
+
                 //foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
                 //{
                 //    m_Graph.UpdateWeight(neighbor, 1000);
                 //}
-                
+
             }
             calcAndDrawPathIfNeeded();
         }
 
     }
 
+
     private void clearObstacleNodeIfIsColliding(GameObject i_CellGameObject, Renderer i_Renderer)
     {
-        
-        if(i_Renderer.material.color == m_ObstacleMaterial.color)
+        int nodeId = getNodeIdFromCellGameObject(i_CellGameObject);
+        MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(nodeId);
+        if (node.IsObstacle)
         {
-            int nodeId = getNodeIdFromCellGameObject(i_CellGameObject);
-            MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(nodeId);
             IList<Vector3> suroundingCells = m_NeighborsPositionCalculator.GetSuroundingCells((int)node.Position.x, (int)node.Position.y, (int)node.Position.z);
 
-            //Debug.Log("Before: ");
-            //{
-            //    foreach (IEdge edge in m_Graph.GetNeighbors(node))
-            //    {
-            //        Debug.Log("id: " + edge.V.Id);
-            //    }
-            //}
             foreach (Vector3 cellPosition in suroundingCells)
             {
-                m_Graph.AddEdgeOfNodesById(nodeId, getIdFromPosition(cellPosition), m_DefaultWeight);
-                m_Graph.AddEdgeOfNodesById(getIdFromPosition(cellPosition), nodeId, m_DefaultWeight);
-            }
+                int id = getIdFromPosition(cellPosition);
+                if (!m_Graph.IsObtacle(id))
+                {
+                    m_Graph.AddEdgeOfNodesById(nodeId, id, m_DefaultWeight);
+                    m_Graph.AddEdgeOfNodesById(id, nodeId, m_DefaultWeight);
+                }
 
-            //Debug.Log("After: ");
-            //{
-            //    foreach(IEdge edge in m_Graph.GetNeighbors(node))
-            //    {
-            //        Debug.Log("id: " + edge.Weight);
-            //    }
-            //}
-            
+            }
+            node.IsObstacle = false;
         }
     }
+
+    //private bool isObstacle(Renderer i_Renderer)
+    //{
+    //    return i_Renderer.material.color == m_ObstacleMaterial.color;
+    //}
 
     private int getIdFromPosition(Vector3 pos)
     {
@@ -189,13 +193,13 @@ public class General : MonoBehaviour
                     //m_IsCurrentlyDrawing = true;
                     //drawPath(res.Item2);
                     drawDistancesAndPath(res.Item1, res.Item2);
-                    
+
 
                 }
                 m_IspathDrawn = true;
             }
         }
-        
+
     }
 
     private void drawDistancesAndPath(IList<Tuple<INode, int>> i_Distances, IList<INode> i_Path)
@@ -206,11 +210,11 @@ public class General : MonoBehaviour
             int nodesDrawnCount = 0;
 
             float maxDistance = getMaxDistance(i_Distances);
-            for (int i = 1; i < i_Distances.Count - 1; i++)
+            for (int i = 1; i < i_Distances.Count; i++)
             {
                 int distance = i_Distances[i].Item2;
                 float colorLevel = distance / maxDistance;
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Distances[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.yellow*colorLevel + Color.red * (1f-colorLevel)));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Distances[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.red * colorLevel + Color.yellow * (1f - colorLevel)));
                 nodesDrawnCount++;
             }
 
@@ -220,7 +224,7 @@ public class General : MonoBehaviour
                 int distance = i_Distances[i].Item2;
                 StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Path[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed, m_PathMaterial.color));
                 nodesDrawnCount++;
-                
+
             }
         }
     }
@@ -232,7 +236,7 @@ public class General : MonoBehaviour
         else
         {
             int max = i_Distances[0].Item2;
-            foreach(Tuple<INode, int> nodeAndDistance in i_Distances)
+            foreach (Tuple<INode, int> nodeAndDistance in i_Distances)
             {
                 if (max < nodeAndDistance.Item2)
                     max = nodeAndDistance.Item2;
@@ -283,12 +287,12 @@ public class General : MonoBehaviour
     {
         int cameraX = k_Columns / 2;
         int cameraZ = k_Rows / 2;
-        int cameraY = k_Rows + k_Columns - 9;
+        int cameraY = (int)((k_Rows + k_Columns) * 0.5f);
         m_MainCamera.transform.position = new Vector3(cameraX, cameraY, cameraZ);
 
     }
 
-    IEnumerator colorCellAfterSeconds(GameObject i_Cell, float i_TimeToWait,Color i_Color)
+    IEnumerator colorCellAfterSeconds(GameObject i_Cell, float i_TimeToWait, Color i_Color)
     {
         yield return new WaitForSeconds(i_TimeToWait);
         i_Cell.GetComponent<Renderer>().material.color = i_Color;
@@ -318,7 +322,7 @@ public class General : MonoBehaviour
         }
     }
 
-    private void clearStartNodeIfIsNeededColliding(GameObject i_CellGameObject, Renderer selectionRenderer)
+    private void clearStartNodeIfIsColliding(GameObject i_CellGameObject, Renderer selectionRenderer)
     {
         if (m_IsStartNodePicked)
         {
@@ -354,7 +358,10 @@ public class General : MonoBehaviour
     {
         foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(i_Id)))
         {
-            m_Graph.UpdateWeight(neighbor, i_Weight);
+            int u_Id = neighbor.U.Id;
+            int v_Id = neighbor.V.Id;
+            m_Graph.UpdateEdgeWeightByIds(u_Id, v_Id, i_Weight);
+            m_Graph.UpdateEdgeWeightByIds(v_Id, u_Id, i_Weight);
         }
     }
 
@@ -382,7 +389,7 @@ public class General : MonoBehaviour
             Material defaultMaterial = node.CellPrefab.GetComponent<CellPrefabScript>().DefaultMaterial;
 
             Material currCellMaterial = node.CellPrefab.GetComponent<Renderer>().material;
-            
+
             if (currCellMaterial.color != m_ObstacleMaterial.color && node.GetNodeId() != m_StartingNode.GetNodeId() && node.GetNodeId() != m_TargetNode.GetNodeId())
             {
                 node.CellPrefab.GetComponent<Renderer>().material = defaultMaterial;
@@ -455,5 +462,5 @@ public class General : MonoBehaviour
     }
     // END DEBUG CODE====================================================================================================================================
 
-    
+
 }

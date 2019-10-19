@@ -133,7 +133,6 @@ namespace Assets
         //2. list of the result path
         public Tuple<IList<Tuple<INode,int>>,IList<INode>> DijkstraWithDistances(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode i_TargetNode)
         {
-            bool isTargetFound = false;
 
             if (!i_Graph.GetAllNodes().Contains(i_StartNode))
             {

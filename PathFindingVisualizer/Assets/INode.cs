@@ -10,5 +10,6 @@ namespace Assets
     {
         int GetNodeId();
         int Id { get; set; }
+        bool IsObstacle { get; set; }
     }
 }

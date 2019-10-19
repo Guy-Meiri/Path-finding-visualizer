@@ -221,9 +221,9 @@ MonoBehaviour:
   m_MainCamera: {fileID: 534669904}
   m_CellPrefab: {fileID: 2934146055552836992, guid: b84e7a356aef6254999f67add540589b,
     type: 3}
-  k_Rows: 4
-  k_Columns: 4
-  m_DrawSpeed: 0.02
+  k_Rows: 14
+  k_Columns: 14
+  m_DrawSpeed: 0.01
   m_DefaultMaterail: {fileID: 2100000, guid: 7cb542c7c3e4b834b954b0dfead6c04a, type: 2}
   m_ObstacleMaterial: {fileID: 2100000, guid: 83e2b3623f4277846b97dc50043a73c8, type: 2}
   m_PathMaterial: {fileID: 2100000, guid: 2a71fe8ad8cb37142ab00b409cb07661, type: 2}
@@ -405,5 +405,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44994cb647f897940935d252ea23d995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MovementSpeed: 6
-  m_RotationSpeed: 30
+  m_MovementSpeed: 10
+  m_RotationSpeed: 60

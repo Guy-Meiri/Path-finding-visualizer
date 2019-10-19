@@ -166,5 +166,20 @@ namespace Assets
             AddEdge(new MyEdge(GetNodeById(u_Id), GetNodeById(v_Id), i_Weight));
         }
 
+        internal bool IsObtacle(int id)
+        {
+            return GetNodeById(id).IsObstacle;
+        }
+
+        internal void UpdateEdgeWeightByIds(int u_Id, int v_Id, int i_Weight)
+        {
+            foreach(IEdge neighbor in m_Graph[GetNodeById(u_Id)])
+            {
+                if(neighbor.V.Id == v_Id)
+                {
+                    neighbor.Weight = i_Weight;
+                }
+            }
+        }
     }
 }
