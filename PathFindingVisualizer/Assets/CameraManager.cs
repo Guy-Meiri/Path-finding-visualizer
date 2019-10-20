@@ -29,7 +29,7 @@ public class CameraManager : MonoBehaviour
     {
         
         int cameraX = m_MainScript.K_Columns / 2;
-        int cameraZ = m_MainScript.K_Rows/ 2;
+        int cameraZ = m_MainScript.K_Rows/ 2 +3;
         int cameraY = (int)((m_MainScript.K_Rows + m_MainScript.K_Columns) * 0.5f);
         m_MainCamera.transform.position = new Vector3(2.5f*cameraX, cameraY, cameraZ);
         m_MainCamera.transform.rotation = m_InitialCameraRotationObject.transform.rotation;

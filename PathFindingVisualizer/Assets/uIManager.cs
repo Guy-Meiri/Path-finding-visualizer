@@ -57,9 +57,27 @@ public class uIManager : MonoBehaviour
         {
             m_BoardSize = newBoardSize;
             Debug.Log("size: " + m_BoardSize);
-            m_GameScript.ReInitalizeGame(m_BoardSize);
-
+            m_GameScript.ReInitalizeGame(m_BoardSize, m_BoardSize);
         }
-        
+    }
+
+    public void OnRowsChanged(float i_newRows)
+    {
+        int rows = (int)i_newRows;
+        if (rows != m_GameScript.K_Rows)
+        {
+            Debug.Log("rows changed to: " + rows);
+            m_GameScript.ReInitalizeGame(rows, m_GameScript.K_Columns);
+        }
+    }
+
+    public void OnColumnsChanged(float i_NewColumns)
+    {
+        int columns = (int)i_NewColumns;
+        if (columns != m_GameScript.K_Columns)
+        {
+            Debug.Log("columns changed to: " + columns);
+            m_GameScript.ReInitalizeGame(m_GameScript.K_Rows, columns);
+        }
     }
 }

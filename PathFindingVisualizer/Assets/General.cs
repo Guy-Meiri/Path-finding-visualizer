@@ -70,33 +70,35 @@ public class General : MonoBehaviour
 
     void Start()
     {
-        m_Graph = new MyDirectedGraph();
-        m_Pathfinder = new PathFinder();
-        m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
         m_StartColor = m_StartMaterial.color;
         m_TargetColor = m_TargetMaterial.color;
-        buildGraph();
+        m_Pathfinder = new PathFinder();
+
+        ReInitalizeGame(k_Rows, k_Columns);
+        //m_Graph = new MyDirectedGraph();
+        //m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
+        //buildGraph();
         //debugDrawBoard();
     }
 
-    public void ReInitalizeGame(int i_newBoardSize)
+    public void ReInitalizeGame(int i_newRows, int i_newColumns)
     {
-        k_Columns = i_newBoardSize;
-        k_Rows = i_newBoardSize;
+        k_Columns = i_newColumns;
+        k_Rows = i_newRows;
         cleanOldBoardPrebabs();
         m_Graph = new MyDirectedGraph();
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
-        
-        //m_StartColor = m_StartMaterial.color;
-        //m_TargetColor = m_TargetMaterial.color;
         buildGraph();
     }
 
     private void cleanOldBoardPrebabs()
     {
-        foreach (MyUnityNode node in m_Graph.GetAllNodes())
+        if(m_Graph != null)
         {
-            Destroy(node.CellPrefab);
+            foreach (MyUnityNode node in m_Graph.GetAllNodes())
+            {
+                Destroy(node.CellPrefab);
+            }
         }
     }
 
