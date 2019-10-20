@@ -9,6 +9,32 @@ public class CameraManager : MonoBehaviour
     [SerializeField]
     private float m_RotationSpeed;
 
+    [SerializeField]
+    private GameObject m_GraphGameObject;
+
+    [SerializeField]
+    private Camera m_MainCamera;
+
+    private General m_MainScript;
+    [SerializeField]
+    private GameObject m_InitialCameraRotationObject;
+
+    private void Start()
+    {
+        m_MainScript = m_GraphGameObject.GetComponent<General>();
+        positionMainCamera();
+    }
+
+    private void positionMainCamera()
+    {
+        
+        int cameraX = m_MainScript.K_Columns / 2;
+        int cameraZ = m_MainScript.K_Rows/ 2;
+        int cameraY = (int)((m_MainScript.K_Rows + m_MainScript.K_Columns) * 0.5f);
+        m_MainCamera.transform.position = new Vector3(2.5f*cameraX, cameraY, cameraZ);
+        m_MainCamera.transform.rotation = m_InitialCameraRotationObject.transform.rotation;
+
+    }
     void Update()
     {
         if (Input.GetKey(KeyCode.W))//up

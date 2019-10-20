@@ -13,3 +13,5 @@ visit(node){
 
 	hashStatus[node]= done
 }
+
+-implement belman-ford in the UI

@@ -25,6 +25,7 @@ public class General : MonoBehaviour
     private bool m_IspathDrawn = false;
 
     private GameObject m_StartNodeGameObject;
+
     private GameObject m_TargetNodeGameObject;
 
     private INode m_StartingNode;
@@ -54,6 +55,8 @@ public class General : MonoBehaviour
     //private Color m_ObstacleColor = Color.red;
     private NeighborsPositionCalculator m_NeighborsPositionCalculator;
 
+    public int K_Rows { get => k_Rows; }
+    public int K_Columns { get => k_Columns; }
 
     void Start()
     {
@@ -62,7 +65,6 @@ public class General : MonoBehaviour
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
         buildGraph();
         //debugDrawBoard();
-        positionMainCamera();
     }
 
 
@@ -73,73 +75,70 @@ public class General : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            GameObject currentCellObject = hit.transform.gameObject;
-            Renderer renderer = currentCellObject.GetComponent<Renderer>();
-            CellPrefabScript currentScript = currentCellObject.GetComponent<CellPrefabScript>();
-
-            if (Input.GetKey(KeyCode.X))
+            if (hit.transform.gameObject.tag == "Cell")
             {
-                clearStartNodeIfIsColliding(currentCellObject, renderer);
-                clearTargetNodeIfIsColliding(currentCellObject, renderer);
-                int id = getNodeIdFromCellGameObject(currentCellObject);
-                MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(id);
-                if (node.IsObstacle)
+                GameObject currentCellObject = hit.transform.gameObject;
+                Renderer renderer = currentCellObject.GetComponent<Renderer>();
+                CellPrefabScript currentScript = currentCellObject.GetComponent<CellPrefabScript>();
+
+                if (Input.GetKey(KeyCode.X))
                 {
-                    clearObstacleNodeIfIsColliding(currentCellObject, renderer); // adds edges if its removing an obstacle }
-                }
-
-                //else
-                //{
-                //    //update Weights
-                //    int currentNodeId = getNodeIdFromCellGameObject(currentCellObject);
-                //    updateWeights(currentNodeId, m_DefaultWeight);
-                //}
-                renderer.material.color = m_DefaultMaterail.color;
-
-            }
-            else if (Input.GetMouseButtonDown(k_StartNodeSelection))
-            {
-                clearStartNode(currentCellObject, renderer);
-                clearObstacleNodeIfIsColliding(currentCellObject, renderer);
-                m_IsStartNodePicked = true;
-                m_StartNodeGameObject = currentCellObject;
-                m_StartingNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject));
-                renderer.material.color = m_StartColor;
-
-                m_IspathDrawn = false;
-            }
-            else if (Input.GetMouseButtonDown(k_TargetNodeSelection))
-            {
-                clearTargetNode(currentCellObject, renderer);
-                clearObstacleNodeIfIsColliding(currentCellObject, renderer);
-                m_IsTargetNodePicked = true;
-                m_TargetNodeGameObject = currentCellObject;
-                m_TargetNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject));
-                renderer.material.color = m_TargetColor;
-
-                m_IspathDrawn = false;
-            }
-            else if (Input.GetMouseButton(k_ObstacleNodeSelection))
-            {
-                clearStartNodeIfIsColliding(currentCellObject, renderer);
-                clearTargetNodeIfIsColliding(currentCellObject, renderer);
-
-                //update node and neighbors
-                if (renderer.material.color != m_ObstacleMaterial.color)
-                {
+                    clearStartNodeIfIsColliding(currentCellObject, renderer);
+                    clearTargetNodeIfIsColliding(currentCellObject, renderer);
                     int id = getNodeIdFromCellGameObject(currentCellObject);
-                    m_Graph.RemoveNodeEdgesById(id);
-                    m_Graph.GetNodeById(id).IsObstacle = true;
-                    renderer.material.color = m_ObstacleMaterial.color;
+                    MyUnityNode node = (MyUnityNode)m_Graph.GetNodeById(id);
+                    if (node.IsObstacle)
+                    {
+                        clearObstacleNodeIfIsColliding(currentCellObject, renderer); // adds edges if its removing an obstacle }
+                    }
+
+                    renderer.material.color = m_DefaultMaterail.color;
+
                 }
+                else if (Input.GetMouseButtonDown(k_StartNodeSelection))
+                {
+                    clearStartNode(currentCellObject, renderer);
+                    clearObstacleNodeIfIsColliding(currentCellObject, renderer);
+                    m_IsStartNodePicked = true;
+                    m_StartNodeGameObject = currentCellObject;
+                    m_StartingNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject));
+                    renderer.material.color = m_StartColor;
 
-                //foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
-                //{
-                //    m_Graph.UpdateWeight(neighbor, 1000);
-                //}
+                    m_IspathDrawn = false;
+                }
+                else if (Input.GetMouseButtonDown(k_TargetNodeSelection))
+                {
+                    clearTargetNode(currentCellObject, renderer);
+                    clearObstacleNodeIfIsColliding(currentCellObject, renderer);
+                    m_IsTargetNodePicked = true;
+                    m_TargetNodeGameObject = currentCellObject;
+                    m_TargetNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject));
+                    renderer.material.color = m_TargetColor;
 
+                    m_IspathDrawn = false;
+                }
+                else if (Input.GetMouseButton(k_ObstacleNodeSelection))
+                {
+                    clearStartNodeIfIsColliding(currentCellObject, renderer);
+                    clearTargetNodeIfIsColliding(currentCellObject, renderer);
+
+                    //update node and neighbors
+                    if (renderer.material.color != m_ObstacleMaterial.color)
+                    {
+                        int id = getNodeIdFromCellGameObject(currentCellObject);
+                        m_Graph.RemoveNodeEdgesById(id);
+                        m_Graph.GetNodeById(id).IsObstacle = true;
+                        renderer.material.color = m_ObstacleMaterial.color;
+                    }
+
+                    //foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
+                    //{
+                    //    m_Graph.UpdateWeight(neighbor, 1000);
+                    //}
+
+                }
+                //calcAndDrawPathIfNeeded(); 
             }
-            calcAndDrawPathIfNeeded();
         }
 
     }
@@ -177,7 +176,27 @@ public class General : MonoBehaviour
         return (int)(pos.z * k_Columns + pos.x);
     }
 
-    private void calcAndDrawPathIfNeeded()
+    public void RunAstar()
+    {
+        if (m_IsStartNodePicked && m_IsTargetNodePicked)
+        {
+            if (!m_IspathDrawn)
+            {
+                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.AstarSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                clearBoard();
+                if (res != null && res.Item2 != null)
+                {
+                    //m_IsCurrentlyDrawing = true;
+                    //drawPath(res.Item2);
+                    drawDistancesAndPath(res.Item1, res.Item2);
+                }
+                m_IspathDrawn = true;
+            }
+        }
+
+    }
+
+    public void RunDijkstra()
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
@@ -189,46 +208,61 @@ public class General : MonoBehaviour
 
 
                 //===========================================do Dikstra With Distances//===========================================
-                //Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                //clearBoard();
-                //if (res != null && res.Item2 != null)
-                //{
-                //    //m_IsCurrentlyDrawing = true;
-                //    //drawPath(res.Item2);
-                //    drawDistancesAndPath(res.Item1, res.Item2);
-                //}
-                //===========================================enddo Dikstra With Distances//===========================================
-
-
-                //===========================================do aStar With Distances//===========================================
-                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.AstarSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
                 clearBoard();
                 if (res != null && res.Item2 != null)
                 {
-                    //m_IsCurrentlyDrawing = true;
+                   //m_IsCurrentlyDrawing = true;
                     //drawPath(res.Item2);
                     drawDistancesAndPath(res.Item1, res.Item2);
                 }
-                //===========================================enddo aStar With Distances//===========================================
-
-
-
-                //===========================================do DFS //===========================================
-                //IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder = m_Pathfinder.DFS(m_Graph, m_StartingNode);
-                //clearBoard();
-                //if (visitedOrder != null)
-                //{
-                //    drawDfs(visitedOrder);
-                //}
-                //===========================================END OF do DFS //===========================================
-
-
-
-
+             
                 m_IspathDrawn = true;
             }
         }
 
+    }
+
+    public void RunBelmanFord()
+    {
+        if (m_IsStartNodePicked && m_IsTargetNodePicked)
+        {
+            if (!m_IspathDrawn)
+            {
+
+                //                IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                //Tuple<IList<Tuple<INode, int>>, IList<INode>>  
+
+
+                //===========================================do Dikstra With Distances//===========================================
+                IList<INode> res = m_Pathfinder.BlemanFordSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+                clearBoard();
+                if (res != null)
+                {
+                    //m_IsCurrentlyDrawing = true;
+                    drawPath(res);
+                    //drawDistancesAndPath(res.Item1, res.Item2);
+                }
+
+                m_IspathDrawn = true;
+            }
+        }
+    }
+
+    public void RunDFS()
+    {
+        if (m_IsStartNodePicked)
+        {
+            IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder = m_Pathfinder.DFS(m_Graph, m_StartingNode);
+            clearBoard();
+            if (visitedOrder != null)
+            {
+                drawDfs(visitedOrder);
+            }
+
+            m_IspathDrawn = true;
+        }
+       
     }
 
     private void drawDfs(IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder)
@@ -331,15 +365,6 @@ public class General : MonoBehaviour
         }
     }
 
-    private void positionMainCamera()
-    {
-        int cameraX = k_Columns / 2;
-        int cameraZ = k_Rows / 2;
-        int cameraY = (int)((k_Rows + k_Columns) * 0.5f);
-        m_MainCamera.transform.position = new Vector3(cameraX, cameraY, cameraZ);
-
-    }
-
     IEnumerator colorCellAfterSeconds(GameObject i_Cell, float i_TimeToWait, Color i_Color)
     {
         yield return new WaitForSeconds(i_TimeToWait);
@@ -438,7 +463,8 @@ public class General : MonoBehaviour
 
             Material currCellMaterial = node.CellPrefab.GetComponent<Renderer>().material;
 
-            if (currCellMaterial.color != m_ObstacleMaterial.color && node.GetNodeId() != m_StartingNode.GetNodeId() && node.GetNodeId() != m_TargetNode.GetNodeId())
+            //if (currCellMaterial.color != m_ObstacleMaterial.color && (node.GetNodeId() != m_StartingNode.GetNodeId()) && (node.GetNodeId() != m_TargetNode.GetNodeId()))
+            if (currCellMaterial.color != m_ObstacleMaterial.color && (!node.Equals(m_StartingNode)) && (!node.Equals(m_TargetNode)))
             {
                 node.CellPrefab.GetComponent<Renderer>().material = defaultMaterial;
             }

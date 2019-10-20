@@ -217,6 +217,9 @@ namespace Assets
             foreach (INode node in i_Graph.GetAllNodes())
                 visitStatus[node] = NodeStatus.Unvisited;
 
+            //make the first visit from the starting node
+            visit(i_Graph, i_StartNode, visitStatus, resultVisitedOrder);
+
             foreach (INode node in i_Graph.GetAllNodes())
             {
                 if (visitStatus[node] == NodeStatus.Unvisited && !node.IsObstacle)
