@@ -180,18 +180,18 @@ public class General : MonoBehaviour
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            if (!m_IspathDrawn)
-            {
+            //if (!m_IspathDrawn)
+            //{
                 Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.AstarSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                clearBoard();
+                ClearBoard();
                 if (res != null && res.Item2 != null)
                 {
                     //m_IsCurrentlyDrawing = true;
                     //drawPath(res.Item2);
                     drawDistancesAndPath(res.Item1, res.Item2);
                 }
-                m_IspathDrawn = true;
-            }
+            //    m_IspathDrawn = true;
+            //}
         }
 
     }
@@ -200,25 +200,18 @@ public class General : MonoBehaviour
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            if (!m_IspathDrawn)
-            {
-
-                //                IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                //Tuple<IList<Tuple<INode, int>>, IList<INode>>  
-
-
-                //===========================================do Dikstra With Distances//===========================================
+            //if (!m_IspathDrawn)
+            //{
+                
                 Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                clearBoard();
+                ClearBoard();
                 if (res != null && res.Item2 != null)
                 {
-                   //m_IsCurrentlyDrawing = true;
-                    //drawPath(res.Item2);
                     drawDistancesAndPath(res.Item1, res.Item2);
                 }
              
-                m_IspathDrawn = true;
-            }
+            //    m_IspathDrawn = true;
+            //}
         }
 
     }
@@ -227,25 +220,19 @@ public class General : MonoBehaviour
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            if (!m_IspathDrawn)
-            {
+            //if (!m_IspathDrawn)
+            //{
 
-                //                IList<INode> res = m_Pathfinder.Dijkstra(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                //Tuple<IList<Tuple<INode, int>>, IList<INode>>  
-
-
-                //===========================================do Dikstra With Distances//===========================================
+                
                 IList<INode> res = m_Pathfinder.BlemanFordSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                clearBoard();
+                ClearBoard();
                 if (res != null)
                 {
-                    //m_IsCurrentlyDrawing = true;
                     drawPath(res);
-                    //drawDistancesAndPath(res.Item1, res.Item2);
                 }
 
-                m_IspathDrawn = true;
-            }
+            //    m_IspathDrawn = true;
+            //}
         }
     }
 
@@ -254,7 +241,7 @@ public class General : MonoBehaviour
         if (m_IsStartNodePicked)
         {
             IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder = m_Pathfinder.DFS(m_Graph, m_StartingNode);
-            clearBoard();
+            ClearBoard();
             if (visitedOrder != null)
             {
                 drawDfs(visitedOrder);
@@ -455,7 +442,7 @@ public class General : MonoBehaviour
         i_CellRenderer.material = m_DefaultMaterail;
     }
 
-    private void clearBoard()
+    public void ClearBoard()
     {
         foreach (MyUnityNode node in m_Graph.GetAllNodes())
         {

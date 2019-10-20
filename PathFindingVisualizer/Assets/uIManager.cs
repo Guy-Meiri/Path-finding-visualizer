@@ -38,4 +38,9 @@ public class uIManager : MonoBehaviour
     {
         m_GameScript.RunDijkstra();
     }
+
+    public void OnClearButtonPressed()
+    {
+        m_GameScript.ClearBoard();
+    }
 }
