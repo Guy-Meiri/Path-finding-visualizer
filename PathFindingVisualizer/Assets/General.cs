@@ -43,26 +43,39 @@ public class General : MonoBehaviour
     [SerializeField]
     private Material m_PathMaterial;
 
+    [SerializeField]
+    private Material m_DFSVisitedMaterial;
+    [SerializeField]
+    private Material m_DFSDoneMaterial;
+    [SerializeField]
+    private Material m_StartMaterial;
+    [SerializeField]
+    private Material m_TargetMaterial;
+
     private PathFinder m_Pathfinder;
     private readonly int k_StartNodeSelection = 0;
     private readonly int k_ClearNodeSelection = 0;
     private readonly int k_TargetNodeSelection = 1;
     private readonly int k_ObstacleNodeSelection = 2;
 
-    private Color m_StartColor = Color.blue;
-    private Color m_TargetColor = Color.cyan;
+    private Color m_StartColor; 
+    private Color m_TargetColor; 
     //private Color m_PathColor = Color.green;
     //private Color m_ObstacleColor = Color.red;
     private NeighborsPositionCalculator m_NeighborsPositionCalculator;
 
     public int K_Rows { get => k_Rows; }
     public int K_Columns { get => k_Columns; }
+    public float DrawSpeed { get => m_DrawSpeed; set => m_DrawSpeed = value; }
 
     void Start()
     {
+
         m_Graph = new MyDirectedGraph();
         m_Pathfinder = new PathFinder();
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
+        m_StartColor = m_StartMaterial.color;
+        m_TargetColor = m_TargetMaterial.color;
         buildGraph();
         //debugDrawBoard();
     }
@@ -130,14 +143,7 @@ public class General : MonoBehaviour
                         m_Graph.GetNodeById(id).IsObstacle = true;
                         renderer.material.color = m_ObstacleMaterial.color;
                     }
-
-                    //foreach (IEdge neighbor in m_Graph.GetNeighbors(m_Graph.GetNodeById(id)))
-                    //{
-                    //    m_Graph.UpdateWeight(neighbor, 1000);
-                    //}
-
                 }
-                //calcAndDrawPathIfNeeded(); 
             }
         }
 
@@ -166,11 +172,6 @@ public class General : MonoBehaviour
         }
     }
 
-    //private bool isObstacle(Renderer i_Renderer)
-    //{
-    //    return i_Renderer.material.color == m_ObstacleMaterial.color;
-    //}
-
     private int getIdFromPosition(Vector3 pos)
     {
         return (int)(pos.z * k_Columns + pos.x);
@@ -180,38 +181,28 @@ public class General : MonoBehaviour
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            //if (!m_IspathDrawn)
-            //{
-                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.AstarSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                ClearBoard();
-                if (res != null && res.Item2 != null)
-                {
-                    //m_IsCurrentlyDrawing = true;
-                    //drawPath(res.Item2);
-                    drawDistancesAndPath(res.Item1, res.Item2);
-                }
-            //    m_IspathDrawn = true;
-            //}
-        }
 
+            Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.AstarSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+            ClearBoard();
+            if (res != null && res.Item2 != null)
+            {
+                drawDistancesAndPath(res.Item1, res.Item2);
+            }
+
+        }
     }
 
     public void RunDijkstra()
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            //if (!m_IspathDrawn)
-            //{
-                
-                Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                ClearBoard();
-                if (res != null && res.Item2 != null)
-                {
-                    drawDistancesAndPath(res.Item1, res.Item2);
-                }
-             
-            //    m_IspathDrawn = true;
-            //}
+
+            Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.DijkstraWithDistances(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+            ClearBoard();
+            if (res != null && res.Item2 != null)
+            {
+                drawDistancesAndPath(res.Item1, res.Item2);
+            }
         }
 
     }
@@ -220,19 +211,12 @@ public class General : MonoBehaviour
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            //if (!m_IspathDrawn)
-            //{
-
-                
-                IList<INode> res = m_Pathfinder.BlemanFordSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
-                ClearBoard();
-                if (res != null)
-                {
-                    drawPath(res);
-                }
-
-            //    m_IspathDrawn = true;
-            //}
+            IList<INode> res = m_Pathfinder.BlemanFordSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+            ClearBoard();
+            if (res != null)
+            {
+                drawPath(res);
+            }
         }
     }
 
@@ -249,7 +233,7 @@ public class General : MonoBehaviour
 
             m_IspathDrawn = true;
         }
-       
+
     }
 
     private void drawDfs(IList<Tuple<INode, PathFinder.NodeStatus>> visitedOrder)
@@ -259,13 +243,13 @@ public class General : MonoBehaviour
         for (int i = 1; i < visitedOrder.Count; i++)
         {
             PathFinder.NodeStatus status = visitedOrder[i].Item2;
-            if(status == PathFinder.NodeStatus.Visited)
+            if (status == PathFinder.NodeStatus.Visited)
             {
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)visitedOrder[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.magenta));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)visitedOrder[i].Item1).CellPrefab, nodesDrawnCount * DrawSpeed, m_DFSVisitedMaterial.color));
             }
-            else if(status == PathFinder.NodeStatus.Done)
+            else if (status == PathFinder.NodeStatus.Done)
             {
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)visitedOrder[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.red));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)visitedOrder[i].Item1).CellPrefab, nodesDrawnCount * DrawSpeed, m_DFSDoneMaterial.color));
             }
             nodesDrawnCount++;
         }
@@ -283,7 +267,7 @@ public class General : MonoBehaviour
             {
                 int distance = i_Distances[i].Item2;
                 float colorLevel = distance / maxDistance;
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Distances[i].Item1).CellPrefab, nodesDrawnCount * m_DrawSpeed, Color.red * colorLevel + Color.yellow * (1f - colorLevel)));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Distances[i].Item1).CellPrefab, nodesDrawnCount * DrawSpeed, Color.red * colorLevel + Color.yellow * (1f - colorLevel)));
                 nodesDrawnCount++;
             }
 
@@ -291,7 +275,7 @@ public class General : MonoBehaviour
             for (int i = 1; i < i_Path.Count - 1; i++)
             {
                 int distance = i_Distances[i].Item2;
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Path[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed, m_PathMaterial.color));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)i_Path[i]).CellPrefab, nodesDrawnCount * DrawSpeed, m_PathMaterial.color));
                 nodesDrawnCount++;
 
             }
@@ -326,7 +310,6 @@ public class General : MonoBehaviour
         {
             for (int z = 0; z < k_Rows; z++)
             {
-                //foreach (Vector3 neighbor in getSuroundingCells(x, 0, z))
                 foreach (Vector3 neighbor in m_NeighborsPositionCalculator.GetSuroundingCells(x, 0, z))
                 {
                     MyEdge edge = new MyEdge(m_Graph.GetNodeById((int)(z * k_Columns + x)), m_Graph.GetNodeById((int)(neighbor.z * k_Columns + neighbor.x)), 1);
@@ -450,7 +433,7 @@ public class General : MonoBehaviour
 
             Material currCellMaterial = node.CellPrefab.GetComponent<Renderer>().material;
 
-            //if (currCellMaterial.color != m_ObstacleMaterial.color && (node.GetNodeId() != m_StartingNode.GetNodeId()) && (node.GetNodeId() != m_TargetNode.GetNodeId()))
+            
             if (currCellMaterial.color != m_ObstacleMaterial.color && (!node.Equals(m_StartingNode)) && (!node.Equals(m_TargetNode)))
             {
                 node.CellPrefab.GetComponent<Renderer>().material = defaultMaterial;
@@ -466,18 +449,10 @@ public class General : MonoBehaviour
             int nodesDrawnCount = 0;
             for (int i = 1; i < res.Count - 1; i++)
             {
-                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)res[i]).CellPrefab, nodesDrawnCount * m_DrawSpeed, m_PathMaterial.color));
+                StartCoroutine(colorCellAfterSeconds(((MyUnityNode)res[i]).CellPrefab, nodesDrawnCount * DrawSpeed, m_PathMaterial.color));
                 nodesDrawnCount++;
-                //if (i == res.Count - 2)
-                //{
-                //    m_IsCurrentlyDrawing = false;
-                //}
             }
         }
-        //else
-        //{
-        //    m_IsCurrentlyDrawing = false;
-        //}
     }
 
     private int getNodeIdFromCellGameObject(GameObject i_Cell)
@@ -495,8 +470,8 @@ public class General : MonoBehaviour
         bool i_IsBlue = true;
         foreach (MyUnityNode node in m_Graph.GetAllNodes())
         {
-            StartCoroutine(doafterWait(node, i * m_DrawSpeed, i_IsBlue));
-            StartCoroutine(doafterWait2(node, (i + 1) * m_DrawSpeed, i_IsBlue));
+            StartCoroutine(doafterWait(node, i * DrawSpeed, i_IsBlue));
+            StartCoroutine(doafterWait2(node, (i + 1) * DrawSpeed, i_IsBlue));
             i = i + 2;
             i_IsBlue = !i_IsBlue;
         }

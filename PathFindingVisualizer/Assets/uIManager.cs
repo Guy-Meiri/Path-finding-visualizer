@@ -43,4 +43,9 @@ public class uIManager : MonoBehaviour
     {
         m_GameScript.ClearBoard();
     }
+
+    public void OnVolumeChanged(float volume)
+    {
+        m_GameScript.DrawSpeed = -volume;
+    }
 }

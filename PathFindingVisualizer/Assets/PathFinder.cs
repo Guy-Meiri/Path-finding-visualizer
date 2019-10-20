@@ -228,6 +228,8 @@ namespace Assets
                 }
             }
 
+            //remove the start node from the returned list for a prettier path
+            resultVisitedOrder.Remove(new Tuple<INode, NodeStatus>(i_StartNode, NodeStatus.Done));
             return resultVisitedOrder;
         }
 
