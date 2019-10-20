@@ -70,7 +70,6 @@ public class General : MonoBehaviour
 
     void Start()
     {
-
         m_Graph = new MyDirectedGraph();
         m_Pathfinder = new PathFinder();
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
@@ -80,6 +79,26 @@ public class General : MonoBehaviour
         //debugDrawBoard();
     }
 
+    public void ReInitalizeGame(int i_newBoardSize)
+    {
+        k_Columns = i_newBoardSize;
+        k_Rows = i_newBoardSize;
+        cleanOldBoardPrebabs();
+        m_Graph = new MyDirectedGraph();
+        m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
+        
+        //m_StartColor = m_StartMaterial.color;
+        //m_TargetColor = m_TargetMaterial.color;
+        buildGraph();
+    }
+
+    private void cleanOldBoardPrebabs()
+    {
+        foreach (MyUnityNode node in m_Graph.GetAllNodes())
+        {
+            Destroy(node.CellPrefab);
+        }
+    }
 
     void Update()
     {

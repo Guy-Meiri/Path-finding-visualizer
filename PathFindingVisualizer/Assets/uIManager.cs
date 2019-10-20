@@ -56,7 +56,9 @@ public class uIManager : MonoBehaviour
         if(newBoardSize != m_BoardSize)
         {
             m_BoardSize = newBoardSize;
-            Debug.Log("size" + (int)i_newSize);
+            Debug.Log("size: " + m_BoardSize);
+            m_GameScript.ReInitalizeGame(m_BoardSize);
+
         }
         
     }
