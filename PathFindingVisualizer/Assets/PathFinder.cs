@@ -11,7 +11,7 @@ namespace Assets
 
         public enum NodeStatus { Unvisited = 0, Visited = 1, Done = 2 };
 
-        public IList<INode> BlemanFordSearch(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode I_TargetNode)
+        public IList<INode> BelmanFordSearch(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode I_TargetNode)
         {
             List<INode> resPath = new List<INode>();
             if (!i_Graph.GetAllNodes().Contains(i_StartNode))
@@ -22,12 +22,16 @@ namespace Assets
 
             Dictionary<INode, int> distances = new Dictionary<INode, int>();
             Dictionary<INode, INode> parents = new Dictionary<INode, INode>();
-            IList<IEdge> edges = i_Graph.GetAllEdges();
+            //IList<IEdge> edges = i_Graph.GetAllEdges();
 
             foreach (INode node in i_Graph.GetAllNodes())
             {
-                distances.Add(node, int.MaxValue);
-                parents.Add(node, null);
+                if (!node.IsObstacle)
+                {
+                    distances.Add(node, int.MaxValue/3);
+                    parents.Add(node, null);
+                }
+                
             }
             distances[i_StartNode] = 0;
 
@@ -35,11 +39,14 @@ namespace Assets
             {
                 foreach (IEdge edge in i_Graph.GetAllEdges())
                 {
-                    int newDistance = distances[edge.U] + edge.GetWeight();
-                    if ((distances[edge.U] != int.MaxValue) && (newDistance < distances[edge.V]))
+                    if (!edge.V.IsObstacle && !edge.U.IsObstacle)
                     {
-                        distances[edge.V] = newDistance;
-                        parents[edge.V] = edge.U;
+                        int newDistance = distances[edge.U] + edge.GetWeight();
+                        if ((distances[edge.U] != int.MaxValue/3) && (newDistance < distances[edge.V]))
+                        {
+                            distances[edge.V] = newDistance;
+                            parents[edge.V] = edge.U;
+                        }
                     }
                 }
             }
@@ -104,7 +111,6 @@ namespace Assets
                                 parents[neighbor.V] = minNode;
                             }
                         }
-
                     }
                 }
 

@@ -7,7 +7,7 @@ public class uIManager : MonoBehaviour
     [SerializeField]
     private GameObject m_GraphObject;
     private General m_GameScript;
-    private int m_BoardSize = 0;
+    //private int m_BoardSize = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -50,23 +50,23 @@ public class uIManager : MonoBehaviour
         m_GameScript.DrawSpeed = -volume;
     }
 
-    public void OnBoardSizeChanged(float i_newSize)
-    {
-        int newBoardSize = (int)i_newSize;
-        if(newBoardSize != m_BoardSize)
-        {
-            m_BoardSize = newBoardSize;
-            Debug.Log("size: " + m_BoardSize);
-            m_GameScript.ReInitalizeGame(m_BoardSize, m_BoardSize);
-        }
-    }
+    //public void OnBoardSizeChanged(float i_newSize)
+    //{
+    //    int newBoardSize = (int)i_newSize;
+    //    if(newBoardSize != m_BoardSize)
+    //    {
+    //        m_BoardSize = newBoardSize;
+    //        Debug.Log("size: " + m_BoardSize);
+    //        m_GameScript.ReInitalizeGame(m_BoardSize, m_BoardSize);
+    //    }
+    //}
 
     public void OnRowsChanged(float i_newRows)
     {
         int rows = (int)i_newRows;
         if (rows != m_GameScript.K_Rows)
         {
-            Debug.Log("rows changed to: " + rows);
+            //Debug.Log("rows changed to: " + rows);
             m_GameScript.ReInitalizeGame(rows, m_GameScript.K_Columns);
         }
     }
@@ -76,7 +76,7 @@ public class uIManager : MonoBehaviour
         int columns = (int)i_NewColumns;
         if (columns != m_GameScript.K_Columns)
         {
-            Debug.Log("columns changed to: " + columns);
+            //Debug.Log("columns changed to: " + columns);
             m_GameScript.ReInitalizeGame(m_GameScript.K_Rows, columns);
         }
     }

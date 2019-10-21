@@ -73,25 +73,20 @@ public class General : MonoBehaviour
         m_StartColor = m_StartMaterial.color;
         m_TargetColor = m_TargetMaterial.color;
         m_Pathfinder = new PathFinder();
-
         ReInitalizeGame(k_Rows, k_Columns);
-        //m_Graph = new MyDirectedGraph();
-        //m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
-        //buildGraph();
-        //debugDrawBoard();
     }
 
     public void ReInitalizeGame(int i_newRows, int i_newColumns)
     {
         k_Columns = i_newColumns;
         k_Rows = i_newRows;
-        cleanOldBoardPrebabs();
+        cleanOldBoardPrefabs();
         m_Graph = new MyDirectedGraph();
         m_NeighborsPositionCalculator = new NeighborsPositionCalculator(k_Rows, k_Columns);
         buildGraph();
     }
 
-    private void cleanOldBoardPrebabs()
+    private void cleanOldBoardPrefabs()
     {
         if(m_Graph != null)
         {
@@ -232,7 +227,9 @@ public class General : MonoBehaviour
     {
         if (m_IsStartNodePicked && m_IsTargetNodePicked)
         {
-            IList<INode> res = m_Pathfinder.BlemanFordSearch(m_Graph, m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject)), m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject)));
+            INode startNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject));
+            INode targetNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject));
+            IList<INode> res = m_Pathfinder.BelmanFordSearch(m_Graph, startNode, targetNode);
             ClearBoard();
             if (res != null)
             {

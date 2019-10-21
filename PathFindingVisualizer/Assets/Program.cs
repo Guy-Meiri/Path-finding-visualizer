@@ -43,7 +43,7 @@ namespace Assets
             IList<INode> allNodes  = graph.GetAllNodes();
             IList<IEdge> neighbors = graph.GetNeighbors(v1);
             PathFinder pathFinder = new PathFinder();
-            IList<INode> res = pathFinder.BlemanFordSearch(graph, v1, v3);
+            IList<INode> res = pathFinder.BelmanFordSearch(graph, v1, v3);
             IList<INode> resDijkstra = pathFinder.Dijkstra(graph, v1, v3);
 
 
