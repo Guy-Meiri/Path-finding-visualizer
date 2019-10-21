@@ -180,8 +180,6 @@ namespace Assets
                         {
                             {
                                 distances[neighbor.V] = newDistance;
-
-
                                 priorityQueue.UpdatePriority(neighbor.V, newDistance);
                                 parents[neighbor.V] = minNode;
                                 if (neighbor.V.Id != i_TargetNode.Id)
@@ -213,6 +211,72 @@ namespace Assets
                 return Tuple.Create<IList<Tuple<INode, int>>, IList<INode>>(distancesHistory, resPath);
             }
 
+        }
+
+        //returns
+        //1. list of tuples - (node, distance)
+        //2. list of the result path
+        public Tuple<IList<Tuple<INode, int>>, IList<INode>> BelmanFordWithDistances(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode, INode I_TargetNode)
+        {
+            List<INode> resPath = new List<INode>();
+            if (!i_Graph.GetAllNodes().Contains(i_StartNode))
+            {
+                //Console.WriteLine("wanted starting node is not in the graph");
+                return null;
+            }
+
+            Dictionary<INode, int> distances = new Dictionary<INode, int>();
+            Dictionary<INode, INode> parents = new Dictionary<INode, INode>();
+            List<Tuple<INode, int>> distancesHistory = new List<Tuple<INode, int>>();
+            //IList<IEdge> edges = i_Graph.GetAllEdges();
+
+            foreach (INode node in i_Graph.GetAllNodes())
+            {
+                if (!node.IsObstacle)
+                {
+                    distances.Add(node, int.MaxValue / 3);
+                    parents.Add(node, null);
+                }
+
+            }
+            distances[i_StartNode] = 0;
+            distancesHistory.Add(new Tuple<INode, int>(i_StartNode, 0));
+
+            for (int i = 0; i < i_Graph.GetNumberOfNodes() - 1; i++)
+            {
+                foreach (IEdge edge in i_Graph.GetAllEdges())
+                {
+                    if (!edge.V.IsObstacle && !edge.U.IsObstacle)
+                    {
+                        int newDistance = distances[edge.U] + edge.GetWeight();
+                        if ((distances[edge.U] != int.MaxValue / 3) && (newDistance < distances[edge.V]))
+                        {
+                            distances[edge.V] = newDistance;
+                            parents[edge.V] = edge.U;
+                            distancesHistory.Add(new Tuple<INode, int>(edge.V, newDistance));
+                        }
+                    }
+                }
+            }
+
+            foreach (IEdge edge in i_Graph.GetAllEdges())
+            {
+                if (distances[edge.U] + edge.GetWeight() < distances[edge.V])
+                {
+                    Console.WriteLine("found negative cycle!");
+                    return null;
+                }
+            }
+
+            INode currentNode = I_TargetNode;
+            while (currentNode != null)
+            {
+                resPath.Insert(0, currentNode);
+                currentNode = parents[currentNode];
+            }
+
+
+            return Tuple.Create<IList<Tuple<INode, int>>, IList<INode>>(distancesHistory, resPath);
         }
 
         public IList<Tuple<INode, NodeStatus>> DFS(MyAbstractGraph<INode, IEdge> i_Graph, INode i_StartNode)

@@ -229,11 +229,11 @@ public class General : MonoBehaviour
         {
             INode startNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_StartNodeGameObject));
             INode targetNode = m_Graph.GetNodeById(getNodeIdFromCellGameObject(m_TargetNodeGameObject));
-            IList<INode> res = m_Pathfinder.BelmanFordSearch(m_Graph, startNode, targetNode);
+            Tuple<IList<Tuple<INode, int>>, IList<INode>> res = m_Pathfinder.BelmanFordWithDistances(m_Graph, startNode, targetNode);
             ClearBoard();
-            if (res != null)
+            if (res != null && res.Item2 != null)
             {
-                drawPath(res);
+                drawDistancesAndPath(res.Item1, res.Item2);
             }
         }
     }
