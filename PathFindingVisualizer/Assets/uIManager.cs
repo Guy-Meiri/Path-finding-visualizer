@@ -50,17 +50,6 @@ public class uIManager : MonoBehaviour
         m_GameScript.DrawSpeed = -volume;
     }
 
-    //public void OnBoardSizeChanged(float i_newSize)
-    //{
-    //    int newBoardSize = (int)i_newSize;
-    //    if(newBoardSize != m_BoardSize)
-    //    {
-    //        m_BoardSize = newBoardSize;
-    //        Debug.Log("size: " + m_BoardSize);
-    //        m_GameScript.ReInitalizeGame(m_BoardSize, m_BoardSize);
-    //    }
-    //}
-
     public void OnRowsChanged(float i_newRows)
     {
         int rows = (int)i_newRows;
@@ -79,5 +68,10 @@ public class uIManager : MonoBehaviour
             //Debug.Log("columns changed to: " + columns);
             m_GameScript.ReInitalizeGame(m_GameScript.K_Rows, columns);
         }
+    }
+
+    public void OnExitButtonPressed()
+    {
+        Application.Quit();
     }
 }
